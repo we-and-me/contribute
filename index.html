@@ -50,7 +50,7 @@ body[data-step="ask"] #ask,body[data-step="type"] #type,body[data-step="talk"] #
 @keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 #ask{justify-content:center}
 .card{
-  background:rgba(255,255,255,.86);-webkit-backdrop-filter:blur(16px) saturate(1.2);backdrop-filter:blur(16px) saturate(1.2);
+  background:rgba(255,255,255,.93);
   border:1px solid rgba(255,255,255,.9);border-radius:28px;box-shadow:var(--shadow);
   padding:30px 22px 24px;display:flex;flex-direction:column;
   animation:cardIn .8s .15s cubic-bezier(.3,1.4,.5,1) both;
@@ -208,7 +208,7 @@ footer img{display:inline-block}
 
 
 @media (max-width:699px){
-  .card{padding:24px 20px 20px;border-radius:24px;background:rgba(255,255,255,.8)} /* bubbles drift behind it on phones */
+  .card{padding:24px 20px 20px;border-radius:24px;background:rgba(255,255,255,.86)} /* bubbles drift behind it on phones */
   #ask h1{font-size:clamp(25px,7.2vw,32px)}
   #ask .label{margin-bottom:14px;font-size:13px}
   #ask .hint{font-size:16.5px;margin-top:12px}
@@ -349,7 +349,7 @@ $("#consent").textContent = P.consent;
 document.querySelectorAll("[data-q]").forEach(el => el.textContent = P.question.replace(/\*/g, ""));
 document.title = P.question.replace(/\*/g, "") + " | We and Me";
 
-const go = step => { document.body.dataset.step = step; window.scrollTo(0, 0); };
+const go = step => { document.body.dataset.step = step; window.scrollTo(0, 0); dispatchEvent(new Event("stepchange")); };
 document.querySelectorAll("[data-back]").forEach(b => b.onclick = () => { stopRecording(true); go("ask"); });
 
 const fmt = s => Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
@@ -558,12 +558,12 @@ $("#again").onclick = () => go("ask");
   const cv = $("#field"), ctx = cv.getContext("2d"), card = $(".card"), url = $("footer img");
   const SHAPE = new Path2D("M50 4C24 4 4 20 4 40c0 11 6 21 16 28l-5 18 21-11c4 1 9 2 14 2 26 0 46-16 46-37S76 4 50 4z");
   const COLORS = ["#1071B9", "#8CC640", "#903F97", "#58ABDC", "#8CC640", "#58ABDC"];
-  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let still = matchMedia("(prefers-reduced-motion: reduce)").matches;
   let W, H, dpr, bubbles = [], box = null, boxes = [], ptr = { x: -999, y: -999 }, last = performance.now();
 
   function size() {
-    dpr = Math.min(devicePixelRatio || 1, 2);
     W = innerWidth; H = innerHeight;
+    dpr = Math.min(devicePixelRatio || 1, 1.5, Math.sqrt(2400000 / (W * H))); // keep the canvas under ~2.4M pixels
     cv.width = W * dpr; cv.height = H * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
@@ -667,9 +667,23 @@ $("#again").onclick = () => go("ask");
     }
   }
 
+  // Safety valve: if this device can't keep up (slow graphics, power saving), thin the room, then hold it still.
+  let frames = 0, slow = 0, frame = 0;
   function loop(now) {
-    const dt = Math.min(3, (now - last) / 16.7); last = now;
-    if (!document.hidden && document.body.dataset.step !== "done") { measure(); step(dt, now); draw(now); }
+    const ms = now - last; last = now;
+    const dt = Math.min(6, ms / 16.7); // speed follows the clock, so a slow device is choppier, not slower
+    if (!document.hidden && document.body.dataset.step !== "done") {
+      if (frame++ % 20 === 0) measure();
+      step(dt, now); draw(now);
+      const lastIn = bubbles[bubbles.length - 1];
+      if (ms < 500 && now - lastIn.born - lastIn.delay > 800) { // judge only once every bubble is in
+        frames++; if (ms > 34) slow++;                                  // slower than ~30 frames a second
+        if (frames === 90 && slow > 45) {
+          if (bubbles.length > 8) { bubbles = bubbles.slice(0, 8); frames = slow = 0; }
+          else { bubbles.forEach(b => { b.vx = b.vy = 0; }); still = true; draw(now); return; }
+        }
+      }
+    }
     requestAnimationFrame(loop);
   }
 
@@ -684,6 +698,7 @@ $("#again").onclick = () => go("ask");
     }
   }, { passive: true });
   addEventListener("resize", () => { size(); measure(); if (still) draw(performance.now()); });
+  addEventListener("stepchange", () => setTimeout(measure, 50));
 
   size(); spawn();
   if (still) { // let them nudge apart out of sight, then hold still
