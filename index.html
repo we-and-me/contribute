@@ -208,7 +208,7 @@ footer img{display:inline-block}
 
 
 @media (max-width:699px){
-  .card{padding:24px 20px 20px;border-radius:24px}
+  .card{padding:24px 20px 20px;border-radius:24px;background:rgba(255,255,255,.8)} /* bubbles drift behind it on phones */
   #ask h1{font-size:clamp(25px,7.2vw,32px)}
   #ask .label{margin-bottom:14px;font-size:13px}
   #ask .hint{font-size:16.5px;margin-top:12px}
@@ -342,7 +342,7 @@ const P = PROMPTS[promptId];
 $("#tagText").textContent = P.tag;
 // Each sentence of the question gets its own line.
 // *word* gets underlined in brand green.
-$("#q").innerHTML = P.question.split(/(?<=[.?!])\s+/)
+$("#q").innerHTML = (P.question.match(/[^.?!]+[.?!]*/g) || [P.question]).map(t => t.trim())
   .map(t => "<span>" + t.replace(/</g, "&lt;").replace(/\*([^*]+)\*/g, '<em class="u">$1</em>') + "</span>").join("");
 $("#hint").textContent = P.hint;
 $("#consent").textContent = P.consent;
@@ -550,9 +550,11 @@ $("#sendA").onclick = async () => {
 $("#again").onclick = () => go("ask");
 
 /* ---------- the floating room: speech bubbles with simple physics ----------
-   They burst out from behind the card, drift, bump into each other and the card,
-   scatter away from a finger or cursor, and jiggle when tapped. */
-(function field() {
+   They fade in, drift, bump into each other, scatter away from a finger or cursor,
+   and jiggle when tapped. On wide screens they bounce off the card; on phones there
+   isn't room, so they float behind the frosted card instead. If the device asks for
+   reduced motion (a common Windows, Mac and iPhone setting), they sit still. */
+(function field() { try {
   const cv = $("#field"), ctx = cv.getContext("2d"), card = $(".card"), url = $("footer img");
   const SHAPE = new Path2D("M50 4C24 4 4 20 4 40c0 11 6 21 16 28l-5 18 21-11c4 1 9 2 14 2 26 0 46-16 46-37S76 4 50 4z");
   const COLORS = ["#1071B9", "#8CC640", "#903F97", "#58ABDC", "#8CC640", "#58ABDC"];
@@ -567,8 +569,7 @@ $("#again").onclick = () => go("ask");
   }
   function measure() {
     const r = card.getBoundingClientRect();
-    box = document.body.dataset.step === "ask" && r.width ? { l: r.left - 6, t: r.top - 6, r: r.right + 6, b: r.bottom + 6 } : null;
-    if (box && W < 700) { box.l = -50; box.r = W + 50; }
+    box = document.body.dataset.step === "ask" && r.width && W >= 700 ? { l: r.left - 6, t: r.top - 6, r: r.right + 6, b: r.bottom + 6 } : null;
     const u = url.getBoundingClientRect();
     boxes = [box, u.width && { l: u.left - 10, t: u.top - 10, r: u.right + 10, b: u.bottom + 10 }].filter(Boolean);
   }
@@ -589,7 +590,7 @@ $("#again").onclick = () => go("ask");
         dots: Math.random() < .3, seed: Math.random() * 1000, delay: 200 + i * 110, born: performance.now(), squish: 0,
       };
     });
-    if (still) bubbles.forEach(b => { b.vx = b.vy = 0; b.delay = 0; });
+    if (still) bubbles.forEach(b => { b.vx = b.vy = 0; b.delay = 0; b.born = -1e9; }); // fully grown, no fade-in
   }
 
   function step(dt, now) {
@@ -646,7 +647,7 @@ $("#again").onclick = () => go("ask");
       const age = now - b.born - b.delay;
       if (age < 0) continue;
       const grow = Math.min(1, age / 700), pop = grow < 1 ? 1 - Math.pow(1 - grow, 3) : 1;
-      const wob = Math.sin(now / 1400 + b.seed) * .05, s = (b.r * 2 / 100) * pop;
+      const wob = still ? 0 : Math.sin(now / 1400 + b.seed) * .05, s = (b.r * 2 / 100) * pop;
       ctx.save();
       ctx.translate(b.x, b.y);
       ctx.rotate(b.tilt + wob);
@@ -658,7 +659,7 @@ $("#again").onclick = () => go("ask");
       if (b.dots) { // "someone is typing..."
         ctx.fillStyle = "#fff";
         for (let k = 0; k < 3; k++) {
-          const lift = Math.max(0, Math.sin(now / 160 - k * .9 + b.seed)) * 4;
+          const lift = still ? 0 : Math.max(0, Math.sin(now / 160 - k * .9 + b.seed)) * 4;
           ctx.beginPath(); ctx.arc(32 + k * 18, 41 - lift, 6, 0, 7); ctx.fill();
         }
       }
@@ -682,11 +683,15 @@ $("#again").onclick = () => go("ask");
       b.squish = .35; b.vy -= 6; b.vx += (Math.random() - .5) * 6;
     }
   }, { passive: true });
-  addEventListener("resize", () => { size(); measure(); });
+  addEventListener("resize", () => { size(); measure(); if (still) draw(performance.now()); });
 
   size(); spawn();
-  if (still) { measure(); draw(performance.now()); } else requestAnimationFrame(loop);
-})();
+  if (still) { // let them nudge apart out of sight, then hold still
+    for (let i = 0; i < 240; i++) step(1, i * 16.7);
+    bubbles.forEach(b => { b.vx = b.vy = 0; });
+    draw(performance.now());
+  } else requestAnimationFrame(loop);
+} catch (e) { /* the bubbles are decoration: never let them break the page */ } })();
 </script>
 </body>
 </html>
