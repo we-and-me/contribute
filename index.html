@@ -1,0 +1,692 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Contribute | We and Me</title>
+<meta name="description" content="Add your voice. Every answer becomes part of something we build together.">
+<meta name="theme-color" content="#EDF4FA">
+<link rel="icon" href="/assets/master-green-sm.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+@font-face{font-family:"ITC Avant Garde Gothic Pro";src:url(/assets/avantgardebold.woff2) format("woff2");font-weight:700;font-display:swap}
+:root{
+  --blue:#1071B9;--blue-dark:#0d5f9c;--green:#8CC640;--green-text:#6BA51F;--purple:#903F97;--sky:#58ABDC;
+  --ink:#3C3C3C;--text:#4C4C50;--muted:#77777d;--line:#dfe6ee;
+  --pale-blue:#EDF4FA;--pale-green:#F6FAF0;--shadow:0 24px 60px -12px rgba(16,60,110,.22),0 2px 6px rgba(16,60,110,.06);
+  --head:"ITC Avant Garde Gothic Pro","Avant Garde",Figtree,system-ui,sans-serif;
+  --body:Figtree,system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:var(--body);color:var(--text);background:#fff;
+  -webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;
+  min-height:100dvh;display:flex;flex-direction:column;
+}
+body::before{ /* colour wash, same family as share.weand.me */
+  content:"";position:fixed;inset:0;z-index:-1;background:
+    radial-gradient(46vmax 36vmax at 0% 0%,rgba(88,171,220,.32),rgba(88,171,220,0) 70%),
+    radial-gradient(34vmax 28vmax at 100% 6%,rgba(140,198,64,.20),rgba(140,198,64,0) 70%),
+    radial-gradient(50vmax 40vmax at 100% 100%,rgba(144,63,151,.20),rgba(144,63,151,0) 70%),
+    radial-gradient(38vmax 30vmax at 0% 100%,rgba(16,113,185,.14),rgba(16,113,185,0) 70%),
+    #f7fafd;
+}
+/* floating conversation bubbles (physics), behind everything */
+#field{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;transition:opacity .6s}
+body:not([data-step="ask"]) #field{opacity:.22}
+body[data-step="done"] #field{opacity:0}
+.wrap{position:relative;z-index:1}
+.wrap{
+  flex:1;width:100%;max-width:560px;margin:0 auto;
+  padding:max(44px,env(safe-area-inset-top)) 22px max(28px,env(safe-area-inset-bottom));
+  display:flex;flex-direction:column;
+}
+
+.step{display:none;flex:1;flex-direction:column;animation:rise .45s cubic-bezier(.2,.8,.2,1)}
+body[data-step="ask"] #ask,body[data-step="type"] #type,body[data-step="talk"] #talk,body[data-step="done"] #done{display:flex}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+#ask{justify-content:center}
+.card{
+  background:rgba(255,255,255,.86);-webkit-backdrop-filter:blur(16px) saturate(1.2);backdrop-filter:blur(16px) saturate(1.2);
+  border:1px solid rgba(255,255,255,.9);border-radius:28px;box-shadow:var(--shadow);
+  padding:30px 22px 24px;display:flex;flex-direction:column;
+  animation:cardIn .8s .15s cubic-bezier(.3,1.4,.5,1) both;
+}
+@keyframes cardIn{from{opacity:0;transform:translateY(24px) scale(.94)}to{opacity:1;transform:none}}
+
+.label{
+  align-self:center;font-weight:700;font-size:14px;color:var(--blue);
+  background:#fff;border:1px solid #d3e5f3;border-radius:999px;padding:7px 14px;margin-bottom:20px;
+  display:inline-flex;align-items:center;gap:8px;
+}
+.label .dot{width:8px;height:8px;border-radius:50%;background:#e2483d;box-shadow:0 0 0 0 rgba(226,72,61,.5);animation:live 1.8s infinite}
+@keyframes live{70%{box-shadow:0 0 0 7px rgba(226,72,61,0)}100%{box-shadow:0 0 0 0 rgba(226,72,61,0)}}
+h1 span{display:block}
+.u{font-style:normal;text-decoration:underline;text-decoration-thickness:.1em;text-underline-offset:.13em;
+  text-decoration-skip-ink:auto;text-decoration-color:transparent;animation:underline .6s 1s ease forwards}
+@keyframes underline{to{text-decoration-color:var(--green-text)}}
+h1 span+span{margin-top:.25em}
+h1{
+  font-family:var(--head);font-weight:700;color:var(--ink);text-align:center;text-wrap:balance;
+  font-size:clamp(30px,8.2vw,46px);line-height:1.08;letter-spacing:-.01em;
+}
+.hint{text-wrap:balance;text-align:center;font-size:18px;line-height:1.5;margin:16px auto 0;max-width:30ch}
+
+.choices{margin-top:28px;display:grid;gap:12px}
+#goTalk{animation:glow 1.8s 1.6s ease 2}
+@keyframes glow{0%,100%{box-shadow:0 10px 24px -10px rgba(16,113,185,.6),0 0 0 0 rgba(16,113,185,0)}50%{box-shadow:0 10px 24px -10px rgba(16,113,185,.6),0 0 0 7px rgba(16,113,185,.22)}}
+.btn{
+  font-family:var(--body);font-weight:700;font-size:18px;border-radius:16px;border:2px solid var(--blue);
+  min-height:62px;padding:0 22px;display:flex;align-items:center;justify-content:center;gap:12px;
+  cursor:pointer;transition:transform .12s,background .2s,box-shadow .2s;text-decoration:none;
+}
+.btn:active{transform:scale(.98)}
+.btn svg{width:22px;height:22px;flex:none}
+.btn-primary{background:var(--blue);color:#fff;box-shadow:0 10px 24px -10px rgba(16,113,185,.6)}
+.btn-primary:hover{background:var(--blue-dark);border-color:var(--blue-dark)}
+.btn-ghost{background:#fff;color:var(--blue)}
+.btn-ghost:hover{background:var(--pale-blue)}
+.btn[disabled]{opacity:.45;pointer-events:none}
+.fine{font-size:13px;color:var(--muted);text-align:center;line-height:1.5;margin:18px auto 0;max-width:40ch;text-wrap:balance}
+
+/* compact question at top of answer screens */
+.q-small{text-wrap:balance;font-family:var(--head);color:var(--ink);font-size:22px;line-height:1.2;text-align:center;margin-bottom:22px}
+.back{
+  align-self:center;background:none;border:0;font:700 15px var(--body);color:var(--muted);
+  padding:12px;margin-top:6px;cursor:pointer;
+}
+
+/* typing */
+textarea,input[type=text]{
+  width:100%;font:400 18px/1.5 var(--body);color:var(--ink);background:#fff;
+  border:2px solid var(--line);border-radius:16px;padding:16px 18px;outline:none;transition:border-color .2s,box-shadow .2s;
+}
+textarea{min-height:42vh;resize:none;flex:1}
+textarea:focus,input[type=text]:focus{border-color:var(--sky);box-shadow:0 0 0 4px rgba(88,171,220,.18)}
+textarea::placeholder,input::placeholder{color:#a3a3aa}
+.send{margin-top:14px}
+.count{font-size:14px;font-weight:700;color:var(--green-text);text-align:left;margin-top:8px;min-height:20px;transition:opacity .3s}
+
+/* talking */
+.stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;min-height:300px}
+.mic{
+  position:relative;width:148px;height:148px;border-radius:50%;border:0;cursor:pointer;
+  background:var(--blue);color:#fff;display:grid;place-items:center;
+  box-shadow:0 18px 40px -14px rgba(16,113,185,.7);transition:transform .15s,background .25s;
+}
+.mic:active{transform:scale(.96)}
+.mic svg{width:52px;height:52px}
+.mic .ring{position:absolute;inset:-14px;border-radius:50%;border:3px solid var(--sky);opacity:0;transform:scale(.9);transition:opacity .2s}
+.mic .stop{display:none;width:40px;height:40px;border-radius:10px;background:#fff}
+body.rec .mic{background:#e2483d;box-shadow:0 18px 40px -14px rgba(226,72,61,.7)}
+body.rec .mic .ring{opacity:1;border-color:rgba(226,72,61,.45)}
+body.rec .mic svg{display:none}
+body.rec .mic .stop{display:block}
+.progress{position:absolute;inset:-14px;width:calc(100% + 28px);height:calc(100% + 28px);transform:rotate(-90deg);pointer-events:none}
+.progress circle{fill:none;stroke:#e2483d;stroke-width:3;stroke-linecap:round;opacity:0;transition:stroke-dashoffset .25s linear}
+body.rec .progress circle{opacity:1}
+.timer{font:700 20px var(--body);color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.timer span{color:#a3a3aa;font-weight:500}
+.status{font-size:17px;text-align:center;min-height:26px;max-width:30ch;line-height:1.45}
+.bars{display:flex;align-items:center;gap:4px;height:36px}
+.bars i{width:5px;border-radius:3px;background:var(--sky);height:6px;transition:height .08s}
+body:not(.rec) .bars{visibility:hidden}
+
+.review{display:none;width:100%;flex-direction:column;align-items:stretch;gap:14px}
+.review .status{align-self:center;margin-bottom:4px}
+body.has-audio .review{display:flex}
+body.has-audio .stage{display:none}
+.player{
+  display:flex;align-items:center;gap:14px;background:#fff;border:2px solid var(--line);border-radius:16px;padding:12px 14px;
+}
+.play{width:48px;height:48px;border-radius:50%;border:0;background:var(--blue);color:#fff;display:grid;place-items:center;cursor:pointer;flex:none}
+.play svg{width:20px;height:20px}
+.track{flex:1;height:6px;border-radius:3px;background:var(--pale-blue);overflow:hidden}
+.track b{display:block;height:100%;width:0;background:var(--sky);border-radius:3px}
+.dur{font:700 15px var(--body);color:var(--muted);font-variant-numeric:tabular-nums}
+.row{display:grid;grid-template-columns:1fr 2fr;gap:10px}
+
+/* done */
+#done{align-items:center;justify-content:center;text-align:center;padding-top:8px}
+/* "the room": everyone's bubbles, then yours pops into the middle */
+.room{position:relative;width:300px;height:230px;margin-bottom:18px}
+.bub{position:absolute;opacity:0;animation:arrive .6s cubic-bezier(.3,1.5,.5,1) forwards,bob 4.5s ease-in-out infinite}
+.bub svg{width:100%;height:100%;display:block}
+.you{left:50%;top:50%;width:170px;height:153px;margin:-80px 0 0 -85px;z-index:2;
+  animation:arrive .7s cubic-bezier(.3,1.7,.5,1) forwards;filter:drop-shadow(0 12px 18px rgba(16,113,185,.35))}
+.you span{position:absolute;left:18px;right:18px;top:46.5%;transform:translateY(-50%);text-align:center;font:700 22px/1.08 var(--head);color:#fff}
+.you::after{content:"";position:absolute;left:50%;top:42%;width:200px;height:200px;margin:-100px 0 0 -100px;border-radius:50%;
+  border:2px solid var(--sky);opacity:0;animation:ripple 1.6s 1.4s ease-out 2}
+@keyframes arrive{from{opacity:0;transform:scale(.2) translateY(20px)}to{opacity:1;transform:none}}
+@keyframes bob{50%{translate:0 -6px}}
+@keyframes ripple{from{opacity:.7;transform:scale(.6)}to{opacity:0;transform:scale(1.5)}}
+.watch{display:inline-flex;align-items:center;gap:10px;margin-top:14px;font-weight:700;font-size:15px;line-height:1.3;color:var(--green-text);
+  background:var(--pale-green);border-radius:16px;padding:9px 16px;max-width:290px;text-align:left}
+.watch svg{flex:none}
+.watch span{text-wrap:balance}
+.watch svg{width:18px;height:18px}
+#done h1{font-size:clamp(34px,9vw,46px)}
+#done .hint{max-width:32ch}
+#done .hint:empty{display:none}
+.again{margin-top:18px;background:none;border:0;font:700 16px var(--body);color:var(--blue);cursor:pointer;padding:10px;
+  text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px;text-decoration-color:rgba(16,113,185,.3)}
+.again:hover{text-decoration-color:var(--blue)}
+/* the main call to action: green, with a moving arrow, a shine, and a soft pulse */
+.cta{position:relative;overflow:hidden;margin-top:20px;display:flex;align-items:center;justify-content:center;gap:12px;
+  min-height:62px;border-radius:16px;background:var(--green-text);color:#fff;text-decoration:none;font:700 19px var(--body);
+  box-shadow:0 12px 26px -10px rgba(107,165,31,.75);animation:ctaPulse 2.4s 2.2s ease-in-out infinite;transition:transform .12s,background .2s}
+.cta:hover{background:#5d9119}
+.cta:active{transform:scale(.98)}
+.cta svg{width:22px;height:22px;animation:nudge 1.2s 2s ease-in-out infinite}
+.cta::after{content:"";position:absolute;top:0;bottom:0;left:-60%;width:40%;transform:skewX(-20deg);
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent);animation:shine 3.2s 2.4s ease-in-out infinite}
+@keyframes nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(6px)}}
+@keyframes shine{0%{left:-60%}35%,100%{left:130%}}
+@keyframes ctaPulse{0%,100%{box-shadow:0 12px 26px -10px rgba(107,165,31,.75),0 0 0 0 rgba(140,198,64,.45)}50%{box-shadow:0 12px 26px -10px rgba(107,165,31,.75),0 0 0 9px rgba(140,198,64,0)}}
+.cta-note{text-align:center;font-size:14px!important;color:var(--muted);margin-top:10px}
+.next{margin-top:24px;width:100%;text-align:left;background:rgba(255,255,255,.88);border:1px solid #fff;border-radius:22px;
+  box-shadow:var(--shadow);padding:22px 22px 18px;animation:cardIn .7s 1.2s cubic-bezier(.3,1.4,.5,1) both}
+.next:empty{display:none}
+.next h2{font:700 20px var(--body);color:var(--green-text);margin-bottom:8px}
+.next p{font-size:16.5px;line-height:1.5}
+.next mark{font-weight:700;color:var(--ink);background:linear-gradient(transparent 55%,rgba(140,198,64,.38) 55%);
+  -webkit-box-decoration-break:clone;box-decoration-break:clone;padding:0 2px}
+.next ul{list-style:none;margin-top:14px;display:grid;gap:10px}
+.next li{display:flex;gap:10px;font-size:16.5px;line-height:1.45;font-weight:700;color:var(--ink)}
+.next li svg{flex:none;width:22px;height:22px;margin-top:1px;color:var(--green-text)}
+.err{color:#c0392b;font-size:15px;text-align:center;min-height:20px;margin-top:10px}
+
+footer{text-align:center;padding-top:26px}
+footer img{display:inline-block}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+.spin{width:20px;height:20px;border-radius:50%;border:3px solid rgba(255,255,255,.4);border-top-color:#fff;animation:sp .8s linear infinite;display:none}
+.sending .spin{display:block}.sending .lbl{display:none}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+
+@media (max-width:699px){
+  .card{padding:24px 20px 20px;border-radius:24px}
+  #ask h1{font-size:clamp(25px,7.2vw,32px)}
+  #ask .label{margin-bottom:14px;font-size:13px}
+  #ask .hint{font-size:16.5px;margin-top:12px}
+  .choices{margin-top:22px;gap:10px}
+  #ask .btn{min-height:56px}
+  .fine{margin-top:14px}
+}
+@media (min-width:700px){
+  .wrap{padding-top:7vh;padding-bottom:7vh}
+  .wrap{max-width:620px}
+  .choices{margin-top:32px}
+  .card{padding:44px 44px 34px}
+  textarea{min-height:260px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.bub{opacity:1}}
+</style>
+</head>
+<body data-step="ask">
+<canvas id="field" aria-hidden="true"></canvas>
+<main class="wrap">
+
+  <!-- 1. The question -->
+  <section class="step" id="ask" aria-labelledby="q">
+    <div class="card">
+    <div class="label" id="tag"><span class="dot"></span><span id="tagText"></span></div>
+    <h1 id="q"></h1>
+    <p class="hint" id="hint"></p>
+    <div class="choices">
+      <button class="btn btn-primary" id="goTalk" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="8.5" y="2.5" width="7" height="12" rx="3.5"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5"/></svg>
+        Answer out loud
+      </button>
+      <button class="btn btn-ghost" id="goType" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4"/></svg>
+        Type it
+      </button>
+    </div>
+    <p class="fine" id="consent"></p>
+    </div>
+  </section>
+
+  <!-- 2a. Type -->
+  <section class="step" id="type">
+    <p class="q-small" data-q></p>
+    <textarea id="text" maxlength="5000" placeholder="Start anywhere. What happened, and how did it lead to the booking?"></textarea>
+    <div class="count" id="count"></div>
+    <button class="btn btn-primary send" id="sendT" type="button" disabled><span class="lbl">Send my answer</span><span class="spin"></span></button>
+    <p class="err" id="errT"></p>
+    <button class="back" type="button" data-back>Back</button>
+  </section>
+
+  <!-- 2b. Talk -->
+  <section class="step" id="talk">
+    <p class="q-small" data-q></p>
+    <div class="stage">
+      <button class="mic" id="mic" type="button" aria-label="Start recording">
+        <svg class="progress" viewBox="0 0 176 176"><circle id="arc" cx="88" cy="88" r="85"/></svg>
+        <span class="ring"></span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="8.5" y="2.5" width="7" height="12" rx="3.5"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3.5"/></svg>
+        <span class="stop"></span>
+      </button>
+      <div class="bars" id="bars"></div>
+      <div class="timer" id="timer">0:00 <span>/ 2:00</span></div>
+      <p class="status" id="status">Tap the mic and talk like you would to a friend.</p>
+    </div>
+    <div class="review">
+      <p class="status">Got it. Give it a listen, or send it in.</p>
+      <div class="player">
+        <button class="play" id="play" type="button" aria-label="Play back">
+          <svg id="playIco" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>
+        </button>
+        <div class="track"><b id="trackFill"></b></div>
+        <span class="dur" id="dur">0:00</span>
+      </div>
+      <div class="row">
+        <button class="btn btn-ghost" id="redo" type="button">Redo</button>
+        <button class="btn btn-primary" id="sendA" type="button"><span class="lbl">Send my answer</span><span class="spin"></span></button>
+      </div>
+      <p class="err" id="errA"></p>
+    </div>
+    <button class="back" type="button" data-back>Back</button>
+  </section>
+
+  <!-- 3. Thanks -->
+  <section class="step" id="done">
+    <div class="room" id="room" aria-hidden="true"></div>
+    <h1 id="thanks"></h1>
+    <p class="watch" id="watch"></p>
+    <p class="hint" id="thanksHint"></p>
+    <div class="next" id="next"></div>
+    <button class="again" id="again" type="button">Share another story</button>
+  </section>
+
+  <footer><img src="/assets/url-blue.png" alt="www.weand.me" width="176" height="22"></footer>
+  <input class="hp" type="text" id="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+  </main>
+
+<script>
+/* Each live session gets a prompt. Swap CURRENT before a session, or link to contribution.weand.me/?p=<id>. */
+const PROMPTS = {
+  "booked-2027": {
+    tag: "Live: How to Get Booked in 2027",
+    question: "How did *you* get booked? Share your story or experience.",
+    hint: "Tell the story instead of a one-word answer.",
+    consent: "Answers are anonymous. Every story goes into a playbook, and you’ll get a sample after the call.",
+    thanks: "Thank you.",
+    thanksHint: "",
+    next: {
+      title: "What happens next",
+      body: "We’re turning every story into *an incredibly practical Playbook on How to Get Booked in 2027*: real accounts you won’t find anywhere online.",
+      items: [
+        "Everyone on this call gets a free sample.",
+        "The full playbook goes to everyone with an Irreplaceable Facilitator Pass to the Connectors Summit."
+      ],
+      cta: "Get your pass",
+      ctaNote: "The full playbook comes with it.",
+      url: "https://connectors.circle.so/checkout/the-irreplaceable-facilitator-pass-to-cs26"
+    }
+  }
+};
+const CURRENT = "booked-2027";
+PROMPTS.test = { ...PROMPTS[CURRENT], tag: "Test run: not kept" }; // contribute.weand.me/?p=test
+const MAX_SECONDS = 120;
+const API = "https://contribute.chad-45b.workers.dev/submit";
+
+const $ = s => document.querySelector(s);
+const params = new URLSearchParams(location.search);
+const promptId = PROMPTS[params.get("p")] ? params.get("p") : CURRENT;
+const P = PROMPTS[promptId];
+
+$("#tagText").textContent = P.tag;
+// Each sentence of the question gets its own line.
+// *word* gets underlined in brand green.
+$("#q").innerHTML = P.question.split(/(?<=[.?!])\s+/)
+  .map(t => "<span>" + t.replace(/</g, "&lt;").replace(/\*([^*]+)\*/g, '<em class="u">$1</em>') + "</span>").join("");
+$("#hint").textContent = P.hint;
+$("#consent").textContent = P.consent;
+document.querySelectorAll("[data-q]").forEach(el => el.textContent = P.question.replace(/\*/g, ""));
+document.title = P.question.replace(/\*/g, "") + " | We and Me";
+
+const go = step => { document.body.dataset.step = step; window.scrollTo(0, 0); };
+document.querySelectorAll("[data-back]").forEach(b => b.onclick = () => { stopRecording(true); go("ask"); });
+
+const fmt = s => Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
+
+/* ---------- sending (shared) ---------- */
+// Text goes as JSON. A recording goes as the raw file, with its details in the X-Meta header.
+async function submit(fields, btn, errEl) {
+  errEl.textContent = "";
+  btn.classList.add("sending"); btn.disabled = true;
+  const { file, ...meta } = fields;
+  meta.prompt = promptId;
+  meta.website = $("#website").value;
+  const opts = file
+    ? { method: "POST", body: file, headers: { "Content-Type": file.type.split(";")[0], "X-Meta": encodeURIComponent(JSON.stringify(meta)) } }
+    : { method: "POST", body: JSON.stringify(meta), headers: { "Content-Type": "application/json" } };
+  let ok = false;
+  for (let attempt = 0; attempt < 4 && !ok; attempt++) {
+    if (attempt) await new Promise(r => setTimeout(r, 800 * 2 ** attempt + Math.random() * 600));
+    try {
+      const r = await fetch(API, opts);
+      ok = r.ok;
+    } catch (e) {}
+  }
+  btn.classList.remove("sending"); btn.disabled = false;
+  if (!ok) { errEl.textContent = "That didn’t go through. Your answer is still here, tap send again."; return; }
+  $("#thanks").textContent = P.thanks;
+  $("#thanksHint").textContent = P.thanksHint;
+  const esc = t => t.replace(/</g, "&lt;");
+  const tick = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+  $("#next").innerHTML = P.next ? "<h2>" + esc(P.next.title) + "</h2><p>" + esc(P.next.body).replace(/\*([^*]+)\*/g, "<mark>$1</mark>") + "</p><ul>" +
+    P.next.items.map(i => "<li>" + tick + "<span>" + esc(i) + "</span></li>").join("") + "</ul>" +
+    (P.next.url ? '<a class="cta" href="' + P.next.url + '" target="_blank" rel="noopener"><span>' + esc(P.next.cta) +
+      '</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15M13 6l6 6-6 6"/></svg></a>' +
+      '<p class="cta-note">' + esc(P.next.ctaNote || "") + "</p>" : "") : "";
+  const words = (fields.text || "").split(/\s+/).filter(Boolean).length;
+  const secs = fields.seconds || 0;
+  $("#watch").innerHTML = WATCH + "<span>" + (fields.file
+    ? "You submitted " + secs + (secs === 1 ? " second" : " seconds") + " of wisdom to the room"
+    : "You added " + words + (words === 1 ? " word" : " words") + " of wisdom to the room") + "</span>";
+  buildRoom();
+  go("done");
+}
+
+const WATCH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="13.5" r="7.5"/><path d="M12 13.5V10M10 2.5h4M18.5 6l1.5-1.5"/></svg>';
+const BUBBLE = c => '<svg viewBox="0 0 100 90"><path fill="' + c + '" d="M50 4C24 4 4 20 4 40c0 11 6 21 16 28l-5 18 21-11c4 1 9 2 14 2 26 0 46-16 46-37S76 4 50 4z"/></svg>';
+// Other people's bubbles: [left, top, size, color] laid out around the centre
+const ROOM = [[6,36,30,"#8CC640"],[34,2,22,"#58ABDC"],[2,150,28,"#903F97"],[40,198,22,"#58ABDC"],[78,0,16,"#903F97"],
+  [242,4,30,"#903F97"],[272,62,22,"#1071B9"],[262,140,32,"#58ABDC"],[226,200,24,"#8CC640"],[150,210,18,"#8CC640"],
+  [0,100,18,"#1071B9"],[284,118,14,"#8CC640"],[200,0,16,"#8CC640"],[96,206,16,"#903F97"]];
+function buildRoom() {
+  const room = $("#room");
+  room.innerHTML = ROOM.map(([x, y, s, c], i) =>
+    '<div class="bub" style="left:' + x + 'px;top:' + y + 'px;width:' + s + 'px;height:' + Math.round(s * .9) +
+    'px;animation-delay:' + (i * 55) + 'ms,' + (i * 300) + 'ms">' + BUBBLE(c) + '</div>').join("") +
+    '<div class="bub you" style="animation-delay:' + (ROOM.length * 55 + 150) + 'ms">' + BUBBLE("#1071B9") + '<span>Your voice matters</span></div>';
+}
+
+/* ---------- typing ---------- */
+const text = $("#text");
+const draftKey = "contrib-draft-" + promptId;
+try { text.value = localStorage.getItem(draftKey) || ""; } catch (e) {}
+function onText() {
+  const len = text.value.trim().length;
+  $("#sendT").disabled = len < 3;
+  const words = text.value.trim().split(/\s+/).filter(Boolean).length;
+  $("#count").textContent = text.value.length > 4000 ? (5000 - text.value.length) + " characters left"
+    : words >= 70 ? "This is gold. Thank you for the depth."
+    : words >= 35 ? "Love the detail. Keep going if there’s more."
+    : words >= 8 ? "Good start. What happened next?" : "";
+  try { localStorage.setItem(draftKey, text.value); } catch (e) {}
+}
+text.addEventListener("input", onText); onText();
+$("#goType").onclick = () => { go("type"); setTimeout(() => text.focus(), 350); };
+$("#sendT").onclick = async () => {
+  await submit({ text: text.value.trim() }, $("#sendT"), $("#errT"));
+  if (document.body.dataset.step === "done") { text.value = ""; try { localStorage.removeItem(draftKey); } catch (e) {} onText(); }
+};
+
+/* ---------- talking ---------- */
+const canRecord = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
+if (!canRecord) $("#goTalk").style.display = "none";
+
+let rec, stream, chunks = [], blob, mime = "", started = 0, tick, audioCtx, analyser, raf, audioEl, objUrl;
+const arc = $("#arc"), C = 2 * Math.PI * 85;
+arc.style.strokeDasharray = C; arc.style.strokeDashoffset = C;
+const bars = $("#bars");
+for (let i = 0; i < 15; i++) bars.appendChild(document.createElement("i"));
+
+$("#goTalk").onclick = () => { resetAudio(); go("talk"); };
+$("#mic").onclick = () => (rec && rec.state === "recording") ? stopRecording() : startRecording();
+
+function pickMime() {
+  for (const m of ["audio/webm;codecs=opus", "audio/mp4", "audio/webm", "audio/ogg;codecs=opus"])
+    if (MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(m)) return m;
+  return "";
+}
+
+async function startRecording() {
+  $("#status").textContent = "Allow the microphone when your browser asks.";
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
+  } catch (e) {
+    $("#status").innerHTML = "We couldn’t reach your microphone. No problem, <a href='#' id='toType'>type it instead</a>.";
+    $("#toType").onclick = ev => { ev.preventDefault(); go("type"); };
+    return;
+  }
+  mime = pickMime();
+  rec = new MediaRecorder(stream, mime ? { mimeType: mime, audioBitsPerSecond: 48000 } : undefined);
+  mime = rec.mimeType || mime || "audio/webm";
+  chunks = [];
+  rec.ondataavailable = e => e.data.size && chunks.push(e.data);
+  rec.onstop = finishRecording;
+  rec.start(1000);
+  started = performance.now();
+  document.body.classList.add("rec");
+  $("#mic").setAttribute("aria-label", "Stop recording");
+  $("#status").textContent = "Listening. Tap again when you’re done.";
+  tick = setInterval(updateTimer, 200);
+  meter();
+}
+
+function updateTimer() {
+  const s = (performance.now() - started) / 1000;
+  $("#timer").innerHTML = fmt(s) + " <span>/ " + fmt(MAX_SECONDS) + "</span>";
+  arc.style.strokeDashoffset = C * (1 - Math.min(s / MAX_SECONDS, 1));
+  const st = $("#status");
+  if (s >= MAX_SECONDS - 10) st.textContent = "Ten seconds left. Bring it home.";
+  else if (s >= 60) st.textContent = "This is gold. Keep going.";
+  else if (s >= 25) st.textContent = "Love it. What happened next?";
+  if (s >= MAX_SECONDS) stopRecording();
+}
+
+function meter() {
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioCtx.createAnalyser(); analyser.fftSize = 64;
+    audioCtx.createMediaStreamSource(stream).connect(analyser);
+    const data = new Uint8Array(analyser.frequencyBinCount), els = bars.children;
+    (function loop() {
+      analyser.getByteFrequencyData(data);
+      for (let i = 0; i < els.length; i++) els[i].style.height = (6 + data[i + 1] / 255 * 30) + "px";
+      raf = requestAnimationFrame(loop);
+    })();
+  } catch (e) {}
+}
+
+function stopRecording(discard) {
+  clearInterval(tick); cancelAnimationFrame(raf);
+  if (audioCtx) { audioCtx.close().catch(() => {}); audioCtx = null; }
+  document.body.classList.remove("rec");
+  $("#mic").setAttribute("aria-label", "Start recording");
+  if (rec && rec.state === "recording") { if (discard) rec.onstop = null; rec.stop(); }
+  if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+}
+
+function finishRecording() {
+  const seconds = (performance.now() - started) / 1000;
+  if (seconds < 2) { $("#status").textContent = "That was quick. Tap the mic and try again."; resetTimer(); return; }
+  blob = new Blob(chunks, { type: mime });
+  blob.seconds = Math.round(seconds);
+  objUrl = URL.createObjectURL(blob);
+  audioEl = new Audio(objUrl);
+  audioEl.ontimeupdate = () => { $("#trackFill").style.width = (audioEl.currentTime / blob.seconds * 100) + "%"; };
+  audioEl.onended = () => { setPlayIcon(false); $("#trackFill").style.width = "100%"; };
+  $("#dur").textContent = fmt(blob.seconds);
+  document.body.classList.add("has-audio");
+}
+
+function setPlayIcon(playing) {
+  $("#playIco").innerHTML = playing ? '<rect x="6" y="4.5" width="4" height="15" rx="1"/><rect x="14" y="4.5" width="4" height="15" rx="1"/>' : '<path d="M7 4.5v15l13-7.5z"/>';
+}
+$("#play").onclick = () => {
+  if (!audioEl) return;
+  if (audioEl.paused) { audioEl.play(); setPlayIcon(true); } else { audioEl.pause(); setPlayIcon(false); }
+};
+
+function resetTimer() {
+  $("#timer").innerHTML = "0:00 <span>/ " + fmt(MAX_SECONDS) + "</span>";
+  arc.style.strokeDashoffset = C;
+}
+function resetAudio() {
+  stopRecording(true);
+  if (audioEl) audioEl.pause();
+  if (objUrl) URL.revokeObjectURL(objUrl);
+  blob = audioEl = objUrl = null;
+  setPlayIcon(false); $("#trackFill").style.width = "0";
+  document.body.classList.remove("has-audio");
+  resetTimer();
+  $("#status").textContent = "Tap the mic and talk like you would to a friend.";
+}
+$("#redo").onclick = resetAudio;
+$("#sendA").onclick = async () => {
+  if (audioEl) { audioEl.pause(); setPlayIcon(false); }
+  await submit({ seconds: blob.seconds, file: blob }, $("#sendA"), $("#errA"));
+  if (document.body.dataset.step === "done") resetAudio();
+};
+
+$("#again").onclick = () => go("ask");
+
+/* ---------- the floating room: speech bubbles with simple physics ----------
+   They burst out from behind the card, drift, bump into each other and the card,
+   scatter away from a finger or cursor, and jiggle when tapped. */
+(function field() {
+  const cv = $("#field"), ctx = cv.getContext("2d"), card = $(".card"), url = $("footer img");
+  const SHAPE = new Path2D("M50 4C24 4 4 20 4 40c0 11 6 21 16 28l-5 18 21-11c4 1 9 2 14 2 26 0 46-16 46-37S76 4 50 4z");
+  const COLORS = ["#1071B9", "#8CC640", "#903F97", "#58ABDC", "#8CC640", "#58ABDC"];
+  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let W, H, dpr, bubbles = [], box = null, boxes = [], ptr = { x: -999, y: -999 }, last = performance.now();
+
+  function size() {
+    dpr = Math.min(devicePixelRatio || 1, 2);
+    W = innerWidth; H = innerHeight;
+    cv.width = W * dpr; cv.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  function measure() {
+    const r = card.getBoundingClientRect();
+    box = document.body.dataset.step === "ask" && r.width ? { l: r.left - 6, t: r.top - 6, r: r.right + 6, b: r.bottom + 6 } : null;
+    if (box && W < 700) { box.l = -50; box.r = W + 50; }
+    const u = url.getBoundingClientRect();
+    boxes = [box, u.width && { l: u.left - 10, t: u.top - 10, r: u.right + 10, b: u.bottom + 10 }].filter(Boolean);
+  }
+  function spawn() {
+    const n = Math.round(Math.min(26, Math.max(12, W * H / 26000))), k = Math.min(1, Math.max(.72, W / 700));
+    measure();
+    bubbles = Array.from({ length: n }, (_, i) => {
+      const r = (i < 3 ? 30 + Math.random() * 12 : 11 + Math.random() * 18) * k;
+      const a = Math.random() * Math.PI * 2, sp = 1.6 + Math.random() * 1.8;
+      // fade in at a calm spot spread around the screen, never under the card or the URL
+      let x, y, tries = 0;
+      do { x = r + Math.random() * (W - 2 * r); y = r + Math.random() * (H - 2 * r); }
+      while (tries++ < 40 && boxes.some(o => x > o.l - r && x < o.r + r && y > o.t - r && y < o.b + r));
+      return {
+        x, y, r,
+        vx: Math.cos(a) * sp * .4, vy: Math.sin(a) * sp * .4,
+        c: COLORS[i % COLORS.length], tilt: (Math.random() - .5) * .5, flip: Math.random() < .35,
+        dots: Math.random() < .3, seed: Math.random() * 1000, delay: 200 + i * 110, born: performance.now(), squish: 0,
+      };
+    });
+    if (still) bubbles.forEach(b => { b.vx = b.vy = 0; b.delay = 0; });
+  }
+
+  function step(dt, now) {
+    for (const b of bubbles) {
+      if (now - b.born < b.delay) continue;
+      // gentle wander so the room never goes still
+      const t = now / 1000 + b.seed;
+      b.vx += Math.cos(t * .5) * .006 * dt; b.vy += Math.sin(t * .6) * .006 * dt;
+      // scatter away from the finger or cursor
+      const dx = b.x - ptr.x, dy = b.y - ptr.y, d = Math.hypot(dx, dy), reach = 110 + b.r;
+      if (d < reach && d > 0) { const f = (1 - d / reach) * .5 * dt; b.vx += dx / d * f; b.vy += dy / d * f; }
+      // drag settles the burst into a slow float
+      const drag = Math.pow(.985, dt);
+      b.vx *= drag; b.vy *= drag;
+      b.x += b.vx * dt; b.y += b.vy * dt;
+      // walls
+      if (b.x < b.r) { b.x = b.r; b.vx = Math.abs(b.vx) * .8; }
+      if (b.x > W - b.r) { b.x = W - b.r; b.vx = -Math.abs(b.vx) * .8; }
+      if (b.y < b.r) { b.y = b.r; b.vy = Math.abs(b.vy) * .8; }
+      if (b.y > H - b.r) { b.y = H - b.r; b.vy = -Math.abs(b.vy) * .8; }
+      // the card and the URL are solid: bounce off their edges
+      for (const box of boxes) {
+        const px = Math.max(box.l, Math.min(b.x, box.r)), py = Math.max(box.t, Math.min(b.y, box.b));
+        let nx = b.x - px, ny = b.y - py, nd = Math.hypot(nx, ny);
+        if (nd < b.r) {
+          if (nd === 0) { // centre is inside the card (only during the burst): push out the nearest side
+            const out = [[b.x - box.l, -1, 0], [box.r - b.x, 1, 0], [b.y - box.t, 0, -1], [box.b - b.y, 0, 1]].sort((p, q) => p[0] - q[0])[0];
+            nx = out[1]; ny = out[2]; nd = 1;
+            b.x = out[1] ? (out[1] < 0 ? box.l - b.r : box.r + b.r) : b.x;
+            b.y = out[2] ? (out[2] < 0 ? box.t - b.r : box.b + b.r) : b.y;
+          } else {
+            nx /= nd; ny /= nd; b.x = px + nx * b.r; b.y = py + ny * b.r;
+          }
+          const vn = b.vx * nx + b.vy * ny;
+          if (vn < 0) { b.vx -= 1.8 * vn * nx; b.vy -= 1.8 * vn * ny; }
+        }
+      }
+      b.squish *= Math.pow(.9, dt);
+    }
+    // bubbles bump into each other
+    for (let i = 0; i < bubbles.length; i++) for (let j = i + 1; j < bubbles.length; j++) {
+      const a = bubbles[i], c = bubbles[j], dx = c.x - a.x, dy = c.y - a.y, min = (a.r + c.r) * .92, d = Math.hypot(dx, dy);
+      if (d >= min || d === 0) continue;
+      const nx = dx / d, ny = dy / d, push = (min - d) / 2;
+      a.x -= nx * push; a.y -= ny * push; c.x += nx * push; c.y += ny * push;
+      const rel = (c.vx - a.vx) * nx + (c.vy - a.vy) * ny;
+      if (rel < 0) { const k = rel * .9; a.vx += k * nx; a.vy += k * ny; c.vx -= k * nx; c.vy -= k * ny; }
+    }
+  }
+
+  function draw(now) {
+    ctx.clearRect(0, 0, W, H);
+    for (const b of bubbles) {
+      const age = now - b.born - b.delay;
+      if (age < 0) continue;
+      const grow = Math.min(1, age / 700), pop = grow < 1 ? 1 - Math.pow(1 - grow, 3) : 1;
+      const wob = Math.sin(now / 1400 + b.seed) * .05, s = (b.r * 2 / 100) * pop;
+      ctx.save();
+      ctx.translate(b.x, b.y);
+      ctx.rotate(b.tilt + wob);
+      ctx.scale(s * (b.flip ? -1 : 1) * (1 + b.squish), s * (1 - b.squish * .7));
+      ctx.translate(-50, -42);
+      ctx.globalAlpha = .9;
+      ctx.fillStyle = b.c;
+      ctx.fill(SHAPE);
+      if (b.dots) { // "someone is typing..."
+        ctx.fillStyle = "#fff";
+        for (let k = 0; k < 3; k++) {
+          const lift = Math.max(0, Math.sin(now / 160 - k * .9 + b.seed)) * 4;
+          ctx.beginPath(); ctx.arc(32 + k * 18, 41 - lift, 6, 0, 7); ctx.fill();
+        }
+      }
+      ctx.restore();
+    }
+  }
+
+  function loop(now) {
+    const dt = Math.min(3, (now - last) / 16.7); last = now;
+    if (!document.hidden && document.body.dataset.step !== "done") { measure(); step(dt, now); draw(now); }
+    requestAnimationFrame(loop);
+  }
+
+  const setPtr = e => { ptr.x = e.clientX; ptr.y = e.clientY; };
+  addEventListener("pointermove", setPtr, { passive: true });
+  addEventListener("pointerleave", () => { ptr.x = ptr.y = -999; });
+  addEventListener("pointerup", e => { if (e.pointerType !== "mouse") { ptr.x = ptr.y = -999; } });
+  addEventListener("pointerdown", e => {
+    setPtr(e);
+    for (const b of bubbles) if (Math.hypot(b.x - e.clientX, b.y - e.clientY) < b.r + 8) { // tap a bubble: it jiggles and hops
+      b.squish = .35; b.vy -= 6; b.vx += (Math.random() - .5) * 6;
+    }
+  }, { passive: true });
+  addEventListener("resize", () => { size(); measure(); });
+
+  size(); spawn();
+  if (still) { measure(); draw(performance.now()); } else requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
